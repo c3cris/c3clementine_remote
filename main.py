@@ -237,7 +237,6 @@ class Control(object):
 
 if __name__ == "__main__":
     pg.init()
-    print(pg.font.get_fonts())
     pg.display.set_caption(CAPTION)
     pg.display.set_mode(SCREEN_SIZE)
     run = Control()
