@@ -1,6 +1,5 @@
 import socket, struct, traceback
 from threading import Thread
-# import clementine_pb2 as cr
 import remotecontrolmessages_pb2 as cr
 from pprint import pprint
 

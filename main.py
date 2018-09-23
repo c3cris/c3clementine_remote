@@ -153,7 +153,7 @@ class Control(object):
 
                             song_o_index = int(math.floor(min(y - 10 - self.songs_rect.y, 25 * 22) / 22)
                                                + self.p.song_start)
-                            if song_o_index in  self.p.songs[self.p.active_playlist]:
+                            if song_o_index <  len(self.p.songs[self.p.active_playlist]):
                                 song = self.p.songs[self.p.active_playlist][song_o_index]
                                 msg.request_change_song.playlist_id = self.p.active_playlist
                                 msg.request_change_song.song_index = song["index"]
