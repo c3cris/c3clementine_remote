@@ -1,5 +1,6 @@
 import math
 from io import BytesIO
+import remotecontrolmessages_pb2 as cr
 
 class Player(object):
 
@@ -53,8 +54,10 @@ class Player(object):
             new_x = max(self.x_offset, min(self.x_offset + 200, x))
             if new_x != self.volume_rect.x:
                 new_volume = int(((float(new_x) - self.x_offset) / 200) * 100)
-                self.control.connection.set_volume(new_volume)
-
+                msg = cr.Message()
+                msg.type = cr.SET_VOLUME
+                msg.request_set_volume.volume = int(new_volume)
+                self.control.connection.send_message(msg)
                 self.volume = new_volume
                 self.volume_rect.x = int(new_x)
 
