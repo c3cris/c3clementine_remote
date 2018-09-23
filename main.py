@@ -27,8 +27,9 @@ class Control(object):
         self.playlists = pg.Surface((400, 400)).convert_alpha()
         self.playlists_rect = self.playlists.get_rect(topleft=(50, 400))
 
-        self.songs = pg.Surface((600, 600)).convert_alpha()
-        self.songs_rect = self.songs.get_rect(topleft=(550, 150))
+        self.songs = pg.Surface((600, 560)).convert_alpha()
+        self.songs_rect = self.songs.get_rect(topleft=(550, 100))
+        self.songs_rect.width=585
 
         self.pg = pg
         self.p = Player(self.pg, self)
@@ -62,10 +63,11 @@ class Control(object):
         if self.p.playlist_change:
             self.playlists.fill(color=(255, 255, 255, 0))
 
-        self.p.draw(self.room)
 
+        self.p.draw(self.room)
         self.screen.blit(self.songs, self.songs_rect)
         self.screen.blit(self.playlists, self.playlists_rect)
+
         self.screen.blit(self.room, (0, 0), self.viewport)
 
     def draw_text(self, msg, x, y, size=18, color="blue"):
@@ -114,6 +116,8 @@ class Control(object):
                         self.p.updating_volume = True
                     if self.p.position_rect.collidepoint((x, y)):
                         self.p.updating_position = True
+                    if self.p.scroll.collidepoint((x, y)):
+                        self.p.updating_scroll = True
 
             elif event.type == pg.MOUSEBUTTONUP:
                 x, y = self.pg.mouse.get_pos()
@@ -125,7 +129,8 @@ class Control(object):
                         msg.type = cr.SET_VOLUME
                         msg.request_set_volume.volume = self.p.volume
                         self.connection.send_message(msg)
-
+                    if self.p.updating_scroll:
+                        self.p.updating_scroll = False
                     if self.p.updating_position:
                         self.p.updating_position = False
                         msg = cr.Message()
@@ -178,11 +183,11 @@ class Control(object):
                 if self.playlists_rect.collidepoint((x, y)):
                     if event.button == 4:
 
-                        self.p.playlists_rect.move_ip(0, 20)
+                        self.p.playlists_rect.move_ip(0, 30)
                         self.p.playlist_change = True
                     elif event.button == 5:
                         # down
-                        self.p.playlists_rect.move_ip(0, -20)
+                        self.p.playlists_rect.move_ip(0, -30)
                         self.p.playlist_change = True
 
                 if self.songs_rect.collidepoint((x, y)):

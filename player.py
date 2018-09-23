@@ -19,14 +19,16 @@ class Player(object):
         self.control = control
         self.updating_volume = False
         self.updating_position = False
+        self.updating_scroll = False
         self.x_offset = 50
-        self.volume_rect = pg.Rect((self.x_offset, 250), (8, 8))
+        self.volume_rect = pg.Rect((self.x_offset, 250), (10, 10))
         self.volume_rect.center = (self.x_offset, 250)
-        self.position_rect = pg.Rect((self.x_offset, 250), (8, 8))
+        self.position_rect = pg.Rect((self.x_offset, 250), (10, 10))
         self.position_rect.center = (self.x_offset, 300)
         self.prev = pg.Rect((self.x_offset, 320), (60, 25))
         self.next = pg.Rect((self.x_offset + 150, 320), (60, 25))
         self.pause_play = pg.Rect((self.x_offset + 70, 320), (60, 25))
+        self.scroll = pg.Rect((590+550, 5+100), (14, 14))
         self.play_status = "PLAY"
         self.playlists_rect = pg.Rect((0, 0), (400, 400))
         self.songs_rect = pg.Rect((0, 0), (500, 600))
@@ -49,6 +51,8 @@ class Player(object):
         self.playlist_change_b = self.playlist_change
         self.songs_change_b = self.songs_change
 
+        cur_playlist_id = self.active_playlist
+
         if self.updating_volume:
             x, y = self.pg.mouse.get_pos()
             new_x = max(self.x_offset, min(self.x_offset + 200, x))
@@ -68,6 +72,15 @@ class Player(object):
                 new_position = int(((float(new_x) - self.x_offset) / 200) * self.track.length)
                 self.position = new_position
                 self.position_rect.x = int(new_x)
+
+        if self.updating_scroll:
+            x, y = self.pg.mouse.get_pos()
+            new_y = int(max(0, (min(y - 105, 550))))
+            pos = math.floor((float(new_y) / 550) * self.playlists[cur_playlist_id]["item_count"])
+            print(pos)
+            self.song_start = int(pos)
+            self.songs_change = True
+
 
     def draw(self, surf):
 
@@ -91,7 +104,7 @@ class Player(object):
             surf.blit(*self.control.draw_text("NEXT", self.next.x, self.next.y, 25))
 
             surf.blit(*self.control.draw_text("Playlists: ", 50, 370))
-            surf.blit(*self.control.draw_text("Songs: ", 550, 120))
+            surf.blit(*self.control.draw_text("Songs: ", 550, 80))
 
         if self.playlists is not None and self.playlist_change:
             self.draw_playlists(self.control.playlists)
@@ -137,6 +150,7 @@ class Player(object):
             y += 22
 
     def draw_songs(self, surf):
+
         y = 10
         cur_playlist_id = self.active_playlist
 
@@ -159,8 +173,10 @@ class Player(object):
 
         self.pg.draw.line(surf, self.pg.Color("gray"), (595, 0), (595, 550), 3)
         pos = float(self.song_start) / float(self.playlists[cur_playlist_id]["item_count"] - 25)
-        new_y = int(pos * 550 + 5)
-        self.pg.draw.circle(surf, self.pg.Color("black"), (595, new_y), 5)
+        y = int(pos * 545 + 3)
+        self.scroll.y = y + 95
+        self.pg.draw.circle(surf, self.pg.Color("black"), (595, y+3), 6)
+
 
     def get_formatted_position(self, pos):
         pos = float(pos)
