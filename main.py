@@ -143,9 +143,6 @@ class Control(object):
                                                + self.p.song_start)
 
                             song = self.p.songs[self.p.active_playlist][song_o_index]
-
-                            # pprint((y - 10, 25 * 22, min(y - 10, 25 * 22) / 22 ))
-
                             msg.request_change_song.playlist_id = self.p.active_playlist
                             msg.request_change_song.song_index = song["index"]
                             self.connection.send_message(msg)
