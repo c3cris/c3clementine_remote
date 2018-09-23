@@ -1,6 +1,6 @@
 import traceback, sys, math
 from pprint import pprint
-import clementine_pb2 as cr
+import remotecontrolmessages_pb2 as cr
 import pygame as pg
 from player import Player
 from clemwrapper import ClemWrapper
@@ -68,10 +68,22 @@ class Control(object):
         self.screen.blit(self.playlists, self.playlists_rect)
         self.screen.blit(self.room, (0, 0), self.viewport)
 
-    def draw_text(self, msg, x, y, size=20, color="blue"):
-        font_type = pg.font.match_font("ubuntu")
+    def draw_text(self, msg, x, y, size=18, color="blue"):
+        # ['arial', 'arialblack', 'bahnschrift', 'calibri', 'cambriacambriamath', 'cambria', 'candara',
+        # 'comicsansms', 'consolas', 'constantia', 'corbel', 'couriernew', 'ebrima', 'franklingothicmedium',
+        # 'gabriola', 'gadugi', 'georgia', 'impact', 'inkfree', 'javanesetext', 'leelawadeeui',
+        # 'leelawadeeuisemilight', 'lucidaconsole', 'lucidasans', 'malgungothic', 'malgungothicsemilight',
+        # 'microsofthimalaya', 'microsoftjhengheimicrosoftjhengheiui', 'microsoftjhengheimicrosoftjhengheiuibold',
+        # 'microsoftjhengheimicrosoftjhengheiuilight', 'microsoftnewtailue', 'microsoftphagspa',
+        # 'microsoftsansserif', 'microsofttaile', 'microsoftyaheimicrosoftyaheiui',
+        # 'microsoftyaheimicrosoftyaheiuibold', 'microsoftyaheimicrosoftyaheiuilight', 'microsoftyibaiti',
+        # 'mingliuextbpmingliuextbmingliuhkscsextb', 'mongolianbaiti', 'msgothicmsuigothicmspgothic', 'mvboli',
+        # 'myanmartext', 'nirmalaui', 'nirmalauisemilight', 'palatinolinotype', 'segoemdl2assets', 'segoeprint',
+        # 'segoescript', 'segoeui', 'segoeuiblack', 'segoeuiemoji', 'segoeuihistoric', 'segoeuisemibold',
+        # 'segoeuisemilight', 'segoeuisymbol', 'simsunnsimsun', 'simsunextb',
+        font_type = pg.font.match_font("consolas")
         font = pg.font.Font(font_type, size)
-        text = font.render(unicode(msg), True, self.pg.Color(color))
+        text = font.render(str(msg), True, self.pg.Color(color))
         rect = text.get_rect(topleft=(x, y))
         return text, rect
 
@@ -141,15 +153,12 @@ class Control(object):
 
                             song_o_index = int(math.floor(min(y - 10 - self.songs_rect.y, 25 * 22) / 22)
                                                + self.p.song_start)
-
-                            song = self.p.songs[self.p.active_playlist][song_o_index]
-
-                            # pprint((y - 10, 25 * 22, min(y - 10, 25 * 22) / 22 ))
-
-                            msg.request_change_song.playlist_id = self.p.active_playlist
-                            msg.request_change_song.song_index = song["index"]
-                            self.connection.send_message(msg)
-                            self.songs_change = True
+                            if song_o_index in  self.p.songs[self.p.active_playlist]:
+                                song = self.p.songs[self.p.active_playlist][song_o_index]
+                                msg.request_change_song.playlist_id = self.p.active_playlist
+                                msg.request_change_song.song_index = song["index"]
+                                self.connection.send_message(msg)
+                                self.songs_change = True
 
                     if self.playlists_rect.collidepoint((x, y)):
                         msg = cr.Message()
@@ -223,6 +232,7 @@ class Control(object):
 
 if __name__ == "__main__":
     pg.init()
+    print(pg.font.get_fonts())
     pg.display.set_caption(CAPTION)
     pg.display.set_mode(SCREEN_SIZE)
     run = Control()

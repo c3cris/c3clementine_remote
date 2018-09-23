@@ -70,18 +70,18 @@ class Player(object):
 
         y = 30
         if self.track is not None:
-            surf.blit(*self.control.draw_text("Track: " + unicode(self.track.title), self.x_offset, y))
+            surf.blit(*self.control.draw_text("Track: " + str(self.track.title), self.x_offset, y))
             y += 20
-            surf.blit(*self.control.draw_text("Artist: " + unicode(self.track.artist), self.x_offset, y))
+            surf.blit(*self.control.draw_text("Artist: " + str(self.track.artist), self.x_offset, y))
             y += 20
-            surf.blit(*self.control.draw_text("Album: " + unicode(self.track.album), self.x_offset, y))
+            surf.blit(*self.control.draw_text("Album: " + str(self.track.album), self.x_offset, y))
 
-            surf.blit(*self.control.draw_text("Volume: " + unicode(self.volume), self.x_offset, 220))
+            surf.blit(*self.control.draw_text("Volume: " + str(self.volume), self.x_offset, 220))
 
             surf.blit(*self.control.draw_text("Position: " +
                                               self.get_formatted_position(self.position) + " / " +
                                               self.track.pretty_length, self.x_offset, 270))
-            surf.blit(*self.control.draw_text("State: " + unicode(self.state), self.x_offset, 140))
+            surf.blit(*self.control.draw_text("State: " + str(self.state), self.x_offset, 140))
 
             surf.blit(*self.control.draw_text("PREV", self.prev.x, self.prev.y, 25))
             surf.blit(*self.control.draw_text(self.play_status, self.pause_play.x, self.prev.y, 25))
@@ -128,8 +128,8 @@ class Player(object):
             if self.playlists[playlist]["active"]:
                 color = "green"
 
-            surf.blit(*self.control.draw_text(unicode(self.playlists[playlist]["name"]) +
-                                              "  [" + unicode(self.playlists[playlist]["item_count"]) + "]", 15, y, 20,
+            surf.blit(*self.control.draw_text(str(self.playlists[playlist]["name"]) +
+                                              "  [" + str(self.playlists[playlist]["item_count"]) + "]", 15, y, 20,
                                               color))
             y += 22
 
@@ -142,7 +142,7 @@ class Player(object):
         elif self.song_start + 25 > self.playlists[cur_playlist_id]["item_count"]:
             self.song_start = self.playlists[cur_playlist_id]["item_count"] - 25
 
-        for i in xrange(self.song_start, self.song_start + 25):
+        for i in range(self.song_start, self.song_start + 25):
 
             color = "black"
 
@@ -150,8 +150,8 @@ class Player(object):
                 color = "green"
 
             surf.blit(*self.control.draw_text(
-                unicode(self.songs[cur_playlist_id][i]["title"][0:30]) +
-                "  [" + unicode(self.songs[cur_playlist_id][i]["artist"]) + "]", 15, y, 20, color))
+                str(self.songs[cur_playlist_id][i]["title"][0:30]) +
+                "  [" + str(self.songs[cur_playlist_id][i]["artist"]) + "]", 15, y, 20, color))
             y += 22
 
         self.pg.draw.line(surf, self.pg.Color("gray"), (595, 0), (595, 550), 3)

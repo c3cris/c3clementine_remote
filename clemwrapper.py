@@ -1,6 +1,7 @@
 import socket, struct, traceback
 from threading import Thread
-import clementine_pb2 as cr
+# import clementine_pb2 as cr
+import remotecontrolmessages_pb2 as cr
 from pprint import pprint
 
 
@@ -94,7 +95,7 @@ class ClemWrapper(object):
             pprint("Keep alive ping")
 
         elif msg.type == cr.SET_VOLUME:
-            pprint("Volume " + unicode(msg.request_set_volume.volume))
+            pprint("Volume " + str(msg.request_set_volume.volume))
             if not self.p.updating_volume:
                 self.p.volume = msg.request_set_volume.volume
 
@@ -103,7 +104,7 @@ class ClemWrapper(object):
                 self.p.position = msg.response_update_track_position.position
 
         elif msg.type == cr.SHUFFLE:
-            pprint("Shuffle " + unicode(msg.shuffle.shuffle_mode))
+            pprint("Shuffle " + str(msg.shuffle.shuffle_mode))
             self.p.shuffle = msg.shuffle.shuffle_mode
 
         elif msg.type == cr.ACTIVE_PLAYLIST_CHANGED:
