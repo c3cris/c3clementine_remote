@@ -187,6 +187,7 @@ class Player(object):
         return "{h}:{m}:{s}".format(s=second, m=minute, h=hour)
 
     def draw_art(self):
-        if self.update_art and self.track.art != "":
+        if self.update_art and self.track is not None \
+                and self.track.art:
             img = BytesIO(self.track.art)
             self.art = self.pg.image.load(img)
