@@ -159,7 +159,7 @@ class Player(object):
         elif self.song_start + 25 > self.playlists[cur_playlist_id]["item_count"]:
             self.song_start = self.playlists[cur_playlist_id]["item_count"] - 25
 
-        for i in range(self.song_start, self.song_start + 25):
+        for i in range(self.song_start, min(self.song_start + 25, self.playlists[cur_playlist_id]["item_count"])):
 
             color = "black"
 

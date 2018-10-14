@@ -1,3 +1,7 @@
 
 *.pyc
 *.xml
+.idea/c3clementine_remote.iml
+/venv/
+*.iml
+.idea/c3clementine_remote.iml
