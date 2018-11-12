@@ -29,8 +29,9 @@ class Control(object):
 
         self.songs = pg.Surface((600, 560)).convert_alpha()
         self.songs_rect = self.songs.get_rect(topleft=(550, 100))
-        self.songs_rect.width=585
+        self.songs_rect.width = 585
 
+        self.update_art = False
         self.pg = pg
         self.p = Player(self.pg, self)
         self.keys = self.pg.key.get_pressed()
@@ -62,7 +63,6 @@ class Control(object):
 
         if self.p.playlist_change:
             self.playlists.fill(color=(255, 255, 255, 0))
-
 
         self.p.draw(self.room)
         self.screen.blit(self.songs, self.songs_rect)
@@ -101,13 +101,13 @@ class Control(object):
                     msg = cr.Message()
                     msg.type = cr.SET_VOLUME
                     msg.request_set_volume.volume = int(self.p.volume - 10)
-                    self.send_message(msg)
+                    self.connection.send_message(msg)
 
                 elif event.key == pg.K_RIGHT:
                     msg = cr.Message()
                     msg.type = cr.SET_VOLUME
                     msg.request_set_volume.volume = int(self.p.volume + 10)
-                    self.send_message(msg)
+                    self.connection.send_message(msg)
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -158,12 +158,12 @@ class Control(object):
 
                             song_o_index = int(math.floor(min(y - 10 - self.songs_rect.y, 25 * 22) / 22)
                                                + self.p.song_start)
-                            if song_o_index <  len(self.p.songs[self.p.active_playlist]):
+                            if song_o_index < len(self.p.songs[self.p.active_playlist]):
                                 song = self.p.songs[self.p.active_playlist][song_o_index]
                                 msg.request_change_song.playlist_id = self.p.active_playlist
                                 msg.request_change_song.song_index = song["index"]
                                 self.connection.send_message(msg)
-                                self.songs_change = True
+                                self.p.songs_change = True
 
                     if self.playlists_rect.collidepoint((x, y)):
                         msg = cr.Message()
@@ -172,13 +172,13 @@ class Control(object):
                         playlist_index = int(
                             min(len(self.p.playlists),
                                 max(0, math.floor(y - 10 - self.playlists_rect.y - self.p.playlists_rect.y) / 22)))
+                        from pprint import pprint
 
                         playlist_id = self.p.playlists_order[playlist_index]
-
+                        pprint(playlist_index)
+                        pprint(playlist_id)
                         msg.request_playlist_songs.id = playlist_id
-
                         self.connection.send_message(msg)
-                        self.playlists_change = True
 
                 if self.playlists_rect.collidepoint((x, y)):
                     if event.button == 4:

@@ -2,6 +2,7 @@ import math
 from io import BytesIO
 import remotecontrolmessages_pb2 as cr
 
+
 class Player(object):
 
     def __init__(self, pg, control):
@@ -28,7 +29,7 @@ class Player(object):
         self.prev = pg.Rect((self.x_offset, 320), (60, 25))
         self.next = pg.Rect((self.x_offset + 150, 320), (60, 25))
         self.pause_play = pg.Rect((self.x_offset + 70, 320), (60, 25))
-        self.scroll = pg.Rect((590+550, 5+100), (14, 14))
+        self.scroll = pg.Rect((590 + 550, 5 + 100), (14, 14))
         self.play_status = "PLAY"
         self.playlists_rect = pg.Rect((0, 0), (400, 400))
         self.songs_rect = pg.Rect((0, 0), (500, 600))
@@ -81,7 +82,6 @@ class Player(object):
             self.song_start = int(pos)
             self.songs_change = True
 
-
     def draw(self, surf):
 
         y = 30
@@ -119,7 +119,8 @@ class Player(object):
     def draw_position(self, surf):
 
         if self.track is not None and self.track.index != 0:
-            self.pg.draw.line(surf, self.pg.Color("green"), (self.x_offset, 300), (self.x_offset + 200, 300), 3)
+            self.pg.draw.line(surf, self.pg.Color("green"), (self.x_offset, 300),
+                              (self.x_offset + 200, 300), 3)
             pos = float(self.position) / float(self.track.length)
             self.position_rect.x = int(pos * 200) + self.x_offset
             self.pg.draw.circle(surf, self.pg.Color("black"), self.position_rect.center, 5)
@@ -133,9 +134,9 @@ class Player(object):
 
     def draw_playlists(self, surf):
 
-        y = 10 + self.playlists_rect.y
+        y = 12 + self.playlists_rect.y
 
-        for playlist in self.playlists:
+        for playlist in self.playlists_order:
 
             if self.playlists[playlist]["closed"]:
                 color = "lightgray"
@@ -154,33 +155,35 @@ class Player(object):
         y = 10
         cur_playlist_id = self.active_playlist
 
-        if self.song_start < 0:
-            self.song_start = 0
-        elif self.song_start + 25 > self.playlists[cur_playlist_id]["item_count"]:
-            self.song_start = self.playlists[cur_playlist_id]["item_count"] - 25
+        if self.playlists[cur_playlist_id]["item_count"] == 0:
+            surf.blit(*self.control.draw_text("NO SONGS IN THIS PLAYLIST", 15, y, 40, "Red"))
+        else:
+            if self.song_start < 0:
+                self.song_start = 0
+            elif self.song_start + 25 > self.playlists[cur_playlist_id]["item_count"]:
+                self.song_start = self.playlists[cur_playlist_id]["item_count"] - 25
 
-        for i in range(self.song_start, min(self.song_start + 25, self.playlists[cur_playlist_id]["item_count"])):
+            for i in range(self.song_start, min(self.song_start + 25,
+                                                self.playlists[cur_playlist_id]["item_count"])):
 
-            color = "black"
+                color = "black"
 
-            if i < len(self.songs[cur_playlist_id]) and self.songs[cur_playlist_id][i]["id"] == self.track.id:
-                color = "green"
+                if i < len(self.songs[cur_playlist_id]) and self.songs[cur_playlist_id][i]["id"] == self.track.id:
+                    color = "green"
 
-            surf.blit(*self.control.draw_text(
-                str(self.songs[cur_playlist_id][i]["title"][0:30]) +
-                "  [" + str(self.songs[cur_playlist_id][i]["artist"]) + "]", 15, y, 20, color))
-            y += 22
+                surf.blit(*self.control.draw_text(
+                    str(self.songs[cur_playlist_id][i]["title"][0:30]) +
+                    "  [" + str(self.songs[cur_playlist_id][i]["artist"]) + "]", 15, y, 20, color))
+                y += 22
 
         self.pg.draw.line(surf, self.pg.Color("gray"), (595, 0), (595, 550), 3)
         pos = float(self.song_start) / float(self.playlists[cur_playlist_id]["item_count"] - 25)
         y = int(pos * 545 + 3)
         self.scroll.y = y + 95
-        self.pg.draw.circle(surf, self.pg.Color("black"), (595, y+3), 6)
-
+        self.pg.draw.circle(surf, self.pg.Color("black"), (595, y + 3), 6)
 
     def get_formatted_position(self, pos):
         pos = float(pos)
-        hour = minute = second = 0
         hour = int(math.floor(pos / 3600))
         minute = int((pos / 60)) % 60
         second = int(pos % 60)
