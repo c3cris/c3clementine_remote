@@ -22,6 +22,7 @@ class ClemWrapper(object):
         self.thread.start()
 
     def connect(self):
+
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.soc.connect((self.ip, self.port))
@@ -32,7 +33,7 @@ class ClemWrapper(object):
         msg_c.request_connect.downloader = self.download
         msg_c.request_connect.send_playlist_songs = self.send_list
         self.connected = True
-        sent = self.send_message(msg_c)
+        self.send_message(msg_c)
 
     def send_message(self, msg):
         if self.soc is not None:

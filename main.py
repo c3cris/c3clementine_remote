@@ -27,9 +27,11 @@ class Control(object):
         self.playlists = pg.Surface((400, 400)).convert_alpha()
         self.playlists_rect = self.playlists.get_rect(topleft=(50, 400))
 
-        self.songs = pg.Surface((600, 600)).convert_alpha()
-        self.songs_rect = self.songs.get_rect(topleft=(550, 150))
+        self.songs = pg.Surface((600, 560)).convert_alpha()
+        self.songs_rect = self.songs.get_rect(topleft=(550, 100))
+        self.songs_rect.width = 585
 
+        self.update_art = False
         self.pg = pg
         self.p = Player(self.pg, self)
         self.keys = self.pg.key.get_pressed()
@@ -63,15 +65,27 @@ class Control(object):
             self.playlists.fill(color=(255, 255, 255, 0))
 
         self.p.draw(self.room)
-
         self.screen.blit(self.songs, self.songs_rect)
         self.screen.blit(self.playlists, self.playlists_rect)
+
         self.screen.blit(self.room, (0, 0), self.viewport)
 
-    def draw_text(self, msg, x, y, size=20, color="blue"):
-        font_type = pg.font.match_font("ubuntu")
+    def draw_text(self, msg, x, y, size=18, color="blue"):
+        # ['arial', 'arialblack', 'bahnschrift', 'calibri', 'cambriacambriamath', 'cambria', 'candara',
+        # 'comicsansms', 'consolas', 'constantia', 'corbel', 'couriernew', 'ebrima', 'franklingothicmedium',
+        # 'gabriola', 'gadugi', 'georgia', 'impact', 'inkfree', 'javanesetext', 'leelawadeeui',
+        # 'leelawadeeuisemilight', 'lucidaconsole', 'lucidasans', 'malgungothic', 'malgungothicsemilight',
+        # 'microsofthimalaya', 'microsoftjhengheimicrosoftjhengheiui', 'microsoftjhengheimicrosoftjhengheiuibold',
+        # 'microsoftjhengheimicrosoftjhengheiuilight', 'microsoftnewtailue', 'microsoftphagspa',
+        # 'microsoftsansserif', 'microsofttaile', 'microsoftyaheimicrosoftyaheiui',
+        # 'microsoftyaheimicrosoftyaheiuibold', 'microsoftyaheimicrosoftyaheiuilight', 'microsoftyibaiti',
+        # 'mingliuextbpmingliuextbmingliuhkscsextb', 'mongolianbaiti', 'msgothicmsuigothicmspgothic', 'mvboli',
+        # 'myanmartext', 'nirmalaui', 'nirmalauisemilight', 'palatinolinotype', 'segoemdl2assets', 'segoeprint',
+        # 'segoescript', 'segoeui', 'segoeuiblack', 'segoeuiemoji', 'segoeuihistoric', 'segoeuisemibold',
+        # 'segoeuisemilight', 'segoeuisymbol', 'simsunnsimsun', 'simsunextb',
+        font_type = pg.font.match_font("consolas")
         font = pg.font.Font(font_type, size)
-        text = font.render(unicode(msg), True, self.pg.Color(color))
+        text = font.render(str(msg), True, self.pg.Color(color))
         rect = text.get_rect(topleft=(x, y))
         return text, rect
 
@@ -87,13 +101,13 @@ class Control(object):
                     msg = cr.Message()
                     msg.type = cr.SET_VOLUME
                     msg.request_set_volume.volume = int(self.p.volume - 10)
-                    self.send_message(msg)
+                    self.connection.send_message(msg)
 
                 elif event.key == pg.K_RIGHT:
                     msg = cr.Message()
                     msg.type = cr.SET_VOLUME
                     msg.request_set_volume.volume = int(self.p.volume + 10)
-                    self.send_message(msg)
+                    self.connection.send_message(msg)
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -102,6 +116,8 @@ class Control(object):
                         self.p.updating_volume = True
                     if self.p.position_rect.collidepoint((x, y)):
                         self.p.updating_position = True
+                    if self.p.scroll.collidepoint((x, y)):
+                        self.p.updating_scroll = True
 
             elif event.type == pg.MOUSEBUTTONUP:
                 x, y = self.pg.mouse.get_pos()
@@ -113,7 +129,8 @@ class Control(object):
                         msg.type = cr.SET_VOLUME
                         msg.request_set_volume.volume = self.p.volume
                         self.connection.send_message(msg)
-
+                    if self.p.updating_scroll:
+                        self.p.updating_scroll = False
                     if self.p.updating_position:
                         self.p.updating_position = False
                         msg = cr.Message()
@@ -142,35 +159,35 @@ class Control(object):
                             song_o_index = int(math.floor(min(y - 10 - self.songs_rect.y, 25 * 22) / 22)
                                                + self.p.song_start)
 
-                            song = self.p.songs[self.p.active_playlist][song_o_index]
-                            msg.request_change_song.playlist_id = self.p.active_playlist
-                            msg.request_change_song.song_index = song["index"]
-                            self.connection.send_message(msg)
-                            self.songs_change = True
+                            if song_o_index < len(self.p.songs[self.p.active_playlist]):
+                                song = self.p.songs[self.p.active_playlist][song_o_index]
+                                msg.request_change_song.playlist_id = self.p.active_playlist
+                                msg.request_change_song.song_index = song["index"]
+                                self.connection.send_message(msg)
+                                self.p.songs_change = True
 
                     if self.playlists_rect.collidepoint((x, y)):
                         msg = cr.Message()
                         msg.type = cr.REQUEST_PLAYLIST_SONGS
-
-                        playlist_index = int(
-                            min(len(self.p.playlists),
-                                max(0, math.floor(y - 10 - self.playlists_rect.y - self.p.playlists_rect.y) / 22)))
+                        start_y = y - 10 - self.playlists_rect.y - self.p.playlists_rect.y
+                        playlist_index = min(len(self.p.playlists),
+                                max(0, int(math.floor(start_y) / 22)))
+                        from pprint import pprint
 
                         playlist_id = self.p.playlists_order[playlist_index]
-
+                        pprint(playlist_index)
+                        pprint(playlist_id)
                         msg.request_playlist_songs.id = playlist_id
-
                         self.connection.send_message(msg)
-                        self.playlists_change = True
 
                 if self.playlists_rect.collidepoint((x, y)):
                     if event.button == 4:
 
-                        self.p.playlists_rect.move_ip(0, 20)
+                        self.p.playlists_rect.move_ip(0, 30)
                         self.p.playlist_change = True
                     elif event.button == 5:
                         # down
-                        self.p.playlists_rect.move_ip(0, -20)
+                        self.p.playlists_rect.move_ip(0, -30)
                         self.p.playlist_change = True
 
                 if self.songs_rect.collidepoint((x, y)):
